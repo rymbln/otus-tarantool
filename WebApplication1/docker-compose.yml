@@ -1,0 +1,49 @@
+services:
+  webapplication1:
+    image: ${DOCKER_REGISTRY-}webapplication1
+    build:
+      context: .
+      dockerfile: WebApplication1/Dockerfile
+    ports:
+        - 8080:8080
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    hostname: postgres
+    environment:
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+    command: postgres -c shared_preload_libraries=pg_stat_statements -c pg_stat_statements.track=all
+    ports:
+        - 5432:5432
+    volumes:
+        - ./database-data:/var/lib/postgresql/data
+        - ./database-init:/docker-entrypoint-initdb.d
+        - ./database-backups:/backups
+  tarantool: 
+    build:
+      context: ./tarantool-docker
+      dockerfile: ./Dockerfile
+    container_name: tarantool
+    hostname: tarantool
+    environment:
+      TARANTOOL_USER_NAME: tarantool
+      TARANTOOL_USER_PASSWORD: tarantool
+      PG_HOST: postgres
+      PG_USER: postgres
+      PG_PASSWORD: postgres
+      PG_DATABASE: postgres
+      PG_PORT: 5432
+    volumes:
+      - ./tarantool-data:/var/lib/tarantool
+      - ./tarantool-init:/usr/local/share/tarantool/init
+    command: tarantool /usr/local/share/tarantool/init/init.lua
+    ports:
+        - 3301:3301
+  tarantool-admin:
+    image: quay.io/basis-company/tarantool-admin
+    container_name: tarantool-admin
+    hostname: tarantool-admin
+    ports: 
+        - 8000:80

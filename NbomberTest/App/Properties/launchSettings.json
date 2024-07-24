@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "NbomberTest": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
