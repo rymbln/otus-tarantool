@@ -8,6 +8,7 @@ internal class Program
 {
     static void Main(string[] args)
     {
+        var url = "https://localhost:59116";
         #region get_by_id_tarantool
         var scenarioTarantoolId = Scenario.Create("get_by_id_tarantool", async context =>
                 {
@@ -16,7 +17,7 @@ internal class Program
                     var id = random.Next(1, 1000000);
 
                     // Define HTTP request
-                    var request = Http.CreateRequest("GET", $"https://localhost:59686/tarantool/get?id={id}");
+                    var request = Http.CreateRequest("GET", $"{url}/tarantool/get?id={id}");
 
                     // Send the HTTP request
                     using var httpClient = new HttpClient();
@@ -47,7 +48,7 @@ internal class Program
             var email = Emails.Data100[id];
 
             // Define HTTP request
-            var request = Http.CreateRequest("GET", $"https://localhost:59686/tarantool/get?email={email}");
+            var request = Http.CreateRequest("GET", $"{url}/tarantool/get?email={email}");
 
             // Send the HTTP request
             using var httpClient = new HttpClient();
@@ -77,7 +78,7 @@ internal class Program
             var id = random.Next(1, 1000000);
 
             // Define HTTP request
-            var request = Http.CreateRequest("GET", $"https://localhost:59686/postgres/get?id={id}");
+            var request = Http.CreateRequest("GET", $"{url}/postgres/get?id={id}");
 
             // Send the HTTP request
             using var httpClient = new HttpClient();
@@ -108,7 +109,7 @@ internal class Program
             var email = Emails.Data100[id];
 
             // Define HTTP request
-            var request = Http.CreateRequest("GET", $"https://localhost:59686/postgres/get?email={email}");
+            var request = Http.CreateRequest("GET", $"{url}/postgres/get?email={email}");
 
             // Send the HTTP request
             using var httpClient = new HttpClient();

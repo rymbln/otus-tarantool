@@ -127,88 +127,6 @@ function reload_single()
         end
     end
 end
-function reload_batch()
-    log.info("Prepare truncate")
-    box.space.users:truncate()
-    log.info("Truncated")
-    local status, pg_conn = driver.connect(conn_str)
-    if status < 0 then
-        log.info(pg_conn)
-    else
-        log.info("Connected")
-        local status, result = pg_conn:execute("SELECT id, first_name, last_name, email, gender, birthdate, is_active, ip_address, score, created, unique_id FROM public.users order by id")
-
-        if status < 0 then
-            log.info(result)
-        else
-            log.info("Start processing %s records", #result[1])
-
-            local users = result[1]
-            local batch_size = 100  -- Define your batch size here
-            local total_count = 0
-            local batch = {}
-
-            for _, user in ipairs(users) do
-                local id = user['id']
-                local first_name = user['first_name']
-                local last_name = user['last_name']
-                local email = user['email']
-                local gender = user['gender']
-                local birthdate = user['birthdate']
-                local is_active = user['is_active']
-                local ip_address = user['ip_address']
-                local score = user['score']
-                local created = user['created']
-                local unique_id = user['unique_id']
-
-                -- Create a Lua table for each user
-                local user_entry = {
-                    id,
-                    first_name,
-                    last_name,
-                    email,
-                    gender,
-                    birthdate,
-                    is_active,
-                    ip_address,
-                    score,
-                    created,
-                    unique_id
-                }
-
-                table.insert(batch, user_entry)
-
-                if #batch == batch_size then
-                    local ok, err = pcall(function()
-                        box.space.users:insert(batch)
-                    end)
-                    if not ok then
-                        log.info("Error inserting batch: %s", err)
-                    else
-                        total_count = total_count + #batch
-                        batch = {}  -- Reset batch after successful insertion
-                    end
-                end
-            end
-
-            -- Insert any remaining entries in the last batch
-            if #batch > 0 then
-                local ok, err = pcall(function()
-                    box.space.users:insert(batch)
-                end)
-                if not ok then
-                    log.info("Error inserting final batch: %s", err)
-                else
-                    total_count = total_count + #batch
-                end
-            end
-
-            pg_conn:close()
-            log.info("Loaded: %s", total_count)
-            return total_count
-        end
-    end
-end
 
 -- Function to insert a new user into the 'users'
 function create_user(id, first_name, last_name, email, gender, birthdate, is_active, ip_address, score, created, unique_id)
@@ -258,18 +176,6 @@ function read_user_by_email(email)
         return nil
     end
 end
-
--- Update a user's information
--- local updated = update_user(1, {{'=', 'first_name', 'Jane'}, {'=', 'last_name', 'Smith'}})
--- if updated then
---     log.info("User updated successfully")
--- else
---     log.info("Failed to update user")
--- end
-
--- Insert a new user
--- create_user(1, "John", "Doe", "john.doe@example.com", "Male", os.time({year=1990, month=1, day=1}), true, "127.0.0.1", "127.0.0.1", 100, 4.5, os.time(), "123e4567-e89b-12d3-a456-426614174000", {"tag1", "tag2"}, '{"nestedField": "value"}')
-
 
 box.once('init', init)
 log.info("Script ended")
